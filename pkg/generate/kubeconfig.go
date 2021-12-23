@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 
+	flagutil "github.com/a630140621/lethe/pkg/util/flag"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
@@ -56,7 +57,7 @@ type kubeconfigOptions struct {
 	host string
 	// defalut is os.Stdout
 	out    io.Writer
-	format format
+	format flagutil.StringEnum
 
 	kubeClient kubernetes.Interface
 }
@@ -64,6 +65,7 @@ type kubeconfigOptions struct {
 func newKubeconfigOptions() *kubeconfigOptions {
 	return &kubeconfigOptions{
 		configFlags: genericclioptions.NewConfigFlags(false),
+		format:      flagutil.NewStringEnum("yaml", "json").WithDefault("yaml"),
 	}
 }
 
@@ -143,7 +145,7 @@ func (o *kubeconfigOptions) Run(ctx context.Context) error {
 		return fmt.Errorf("Run: %w", err)
 	}
 
-	if o.format.Is(formatJSON) {
+	if o.format.Is("json") {
 		out, err = yaml.YAMLToJSON(out)
 		if err != nil {
 			return fmt.Errorf("Run: %w", err)
